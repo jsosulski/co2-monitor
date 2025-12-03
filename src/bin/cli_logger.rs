@@ -1,14 +1,21 @@
-use co2::{Co2Monitor, MonitorReading};
+use co2::{MonitorReading, MonitorReadingParts, device::Co2MonitorCommunication, pc::PcCo2Monitor};
+use std::io::Write;
 
 fn main() {
-    let mut monitor = Co2Monitor::new();
-    let mut prev_reading = MonitorReading::empty();
+    let monitor = PcCo2Monitor::init_and_connect();
+    let mut prev_reading = MonitorReading::default();
+    let mut partial_reading = MonitorReadingParts::default();
     let program_start = std::time::Instant::now();
     loop {
-        let reading = monitor.poll();
-        if reading != prev_reading {
-            println!("{:>10.1?} -- {:.1}", program_start.elapsed(), reading);
-            prev_reading = reading;
+        if let Ok(Some(reading)) = monitor.read_to_part(&mut partial_reading) {
+            if reading != prev_reading {
+                println!();
+                print!("{:>10.1?} -- {:.1}", program_start.elapsed(), reading);
+                prev_reading = reading;
+            } else {
+                print!(".");
+            }
+            std::io::stdout().flush().unwrap();
         }
     }
 }

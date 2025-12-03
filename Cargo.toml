@@ -3,10 +3,15 @@ name = "co2"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "co2_cli"
+path = "src/bin/cli_logger.rs"
+required-features = ["pc"]
+
 [dependencies]
 heapless = { version = "0.9.2", features = ["defmt"] }
 hidapi = { version = "2.6.3", optional = true }
 # hex = "0.4.3"
 
 [features]
-hidapi = ["dep:hidapi"]
+pc = ["dep:hidapi"]
