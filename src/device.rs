@@ -1,3 +1,4 @@
+//! Contains device specific handling code and the trait definition for the Co2Monitor.
 use crate::{MonitorReading, MonitorReadingParts};
 
 const VID: u16 = 0x04d9;
@@ -9,13 +10,13 @@ pub enum MonitorError {
     ReadFailed,
     /// The read report doesn't contain a terminator byte in 5-th position: 0x0d.
     MissingTerminatorByte,
-    /// Bytes 1,2 and 3, don't sum to byte 4.
-    ChecksumError,
+    /// Bytes 1, 2 and 3, don't sum to byte 4 (in the lowest byte).
+    ChecksumInvalid,
+    /// A timeout interrupted the read.
+    Timeout,
 }
 
 pub trait Co2MonitorCommunication {
-    type Error;
-
     /// This method should create your managing struct and set up the necessary connection.
     fn init_and_connect() -> Self;
     /// This rarely needs to be called directly, use `read_to_part` instead.
@@ -52,7 +53,7 @@ pub trait Co2MonitorCommunication {
                     as u8
                     != read_buffer[3]
                 {
-                    return Err(MonitorError::ChecksumError);
+                    return Err(MonitorError::ChecksumInvalid);
                 }
 
                 let op = read_buffer[0];

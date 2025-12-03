@@ -1,3 +1,5 @@
+//! Whenver a new complete reading is available, logs it *as a whole* to the cli. When the reading didn't change, a
+//! simple '.' is appended to the line.
 use co2::{MonitorReading, MonitorReadingParts, device::Co2MonitorCommunication, pc::PcCo2Monitor};
 use std::io::Write;
 

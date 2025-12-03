@@ -1,15 +1,13 @@
 //! Implement the Co2 monitor reading for a PC using the `hidapi` crate.
+use crate::device::{Co2MonitorCommunication, MonitorError};
 use hidapi::{HidApi, HidDevice};
 
-use crate::device::{Co2MonitorCommunication, MonitorError};
-
+/// This struct holds the `HidDevice` from hidapi crate, that is needed for communication.
 pub struct PcCo2Monitor {
     device: HidDevice,
 }
 
 impl Co2MonitorCommunication for PcCo2Monitor {
-    type Error = MonitorError;
-
     fn init_and_connect() -> Self {
         let api = HidApi::new().expect("Could not initialize Hid Api.");
         let device = api
@@ -24,7 +22,7 @@ impl Co2MonitorCommunication for PcCo2Monitor {
         Self { device }
     }
 
-    fn read(&self, read_buffer: &mut [u8; 8]) -> Result<usize, Self::Error> {
+    fn read(&self, read_buffer: &mut [u8; 8]) -> Result<usize, MonitorError> {
         self.device
             .read_timeout(read_buffer, 1000)
             .map_err(|_| MonitorError::ReadFailed)

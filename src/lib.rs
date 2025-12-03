@@ -1,4 +1,7 @@
+//! The actual code for converting the HID reports between byte values and useful numbers.
 #![no_std]
+
+// use heapless::{String, Vec};
 pub mod device;
 #[cfg(feature = "pc")]
 pub mod pc;
@@ -147,15 +150,17 @@ impl core::fmt::Display for Co2Value {
         }
     }
 }
-// pub fn hex_pretty(bytes: &[u8]) -> String {
-//     let hex = hex::encode(bytes);
+
+// pub fn hex_pretty<const N: usize>(bytes: &[u8]) -> String<N> {
+//     let mut out_slice = Vec::<u8, N>::new();
+//     hex::encode_to_slice(bytes, &mut out_slice).unwrap();
 //     let mut count = 0;
-//     let mut s = String::with_capacity(64);
-//     for c in hex.chars() {
-//         s.push(c);
+//     let mut s = String::<N>::new();
+//     for c in out_slice {
+//         let _ = s.push(c as char);
 //         count += 1;
 //         if count % 2 == 0 {
-//             s.push(' ');
+//             let _ = s.push(' ');
 //             count = 0;
 //         }
 //     }
