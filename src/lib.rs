@@ -142,6 +142,15 @@ pub enum Co2Value {
     TooHigh(u16),
 }
 
+impl Co2Value {
+    pub fn as_num_and_bool(&self) -> (u16, bool) {
+        match self {
+            Co2Value::Valid(n) => (*n, true),
+            Co2Value::TooHigh(n) => (*n, false),
+        }
+    }
+}
+
 impl core::fmt::Display for Co2Value {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {

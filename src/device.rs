@@ -20,7 +20,7 @@ pub trait Co2MonitorCommunication {
     /// This method should create your managing struct and set up the necessary connection.
     fn init_and_connect() -> Self;
     /// This rarely needs to be called directly, use `read_to_part` instead.
-    /// It should read a single 8-byte report to the read_buffer.
+    /// It should read a single 8-byte HID report to the read_buffer.
     fn read(&self, read_buffer: &mut [u8; 8]) -> Result<usize, MonitorError>;
 
     /// Online resources have some key or magic table in here, but for my co2 device it works with just zeroes...
