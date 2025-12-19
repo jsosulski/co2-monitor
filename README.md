@@ -12,6 +12,9 @@ My device is a rebrand of [zgm053u](https://www.zyaura.com/product-detail/zgm053
 [airco2ntrol-mini](https://www.tfa-dostmann.de/produkt/co2-monitor-airco2ntrol-mini-31-5006/) by tfa.
 Interestingly the tfa device doesn't even advertise the capability to read out anything from the usb port.
 
+If at some point I figure out how to have an ESP32-S3 act as a USB-HID host using Rust, I might also add a program
+that reads out the sensor using the esp32 and publishes it somewhere over the ~rainbow~ wifi.
+
 ## CLI usage
 
 The CLI works on linux, for other OSes YMMV. It logs approx every 5 seconds the latest co2 and temperature readings to
@@ -44,4 +47,9 @@ I found that packages with opcode `0x6e` decrease somewhat linearly with increas
 is to watch this value, and when it's lower than some value, the reading will be marked as "invalid" which would
 correspond to values being out of range of the original spec (..3000ppm).
 
+## Further Reading
 
+* https://www.zyaura.com/product-detail/zgm053u/
+* https://github.com/uucidl/uu.co2-reader
+* https://hackaday.io/project/5301-reverse-engineering-a-low-cost-usb-co-monitor/log/17909-all-your-base-are-belong-to-us
+* https://revspace.nl/CO2MeterHacking

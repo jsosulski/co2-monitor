@@ -8,14 +8,16 @@ const PID: u16 = 0xa052;
 pub enum MonitorError {
     /// Something during the read failed.
     ReadFailed,
-    /// The read report doesn't contain a terminator byte in 5-th position: 0x0d.
+    /// The read report doesn't contain the terminator byte in 5-th position: 0x0d.
     MissingTerminatorByte,
     /// Bytes 1, 2 and 3, don't sum to byte 4 (in the lowest byte).
     ChecksumInvalid,
-    /// A timeout interrupted the read.
+    /// A timeout interrupted the USB-HID read.
     Timeout,
 }
 
+/// Implement this trait for your struct that handles talking over USB-HID. See `pc.rs` for an example implementation
+/// that uses the hidapi rust crate.
 pub trait Co2MonitorCommunication {
     /// This method should create your managing struct and set up the necessary connection.
     fn init_and_connect() -> Self;

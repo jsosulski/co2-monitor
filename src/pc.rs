@@ -1,4 +1,4 @@
-//! Implement the Co2 monitor reading for a PC using the `hidapi` crate.
+//! Implement the Co2 monitor communication for a PC using the `hidapi` crate.
 use crate::device::{Co2MonitorCommunication, MonitorError};
 use hidapi::{HidApi, HidDevice};
 

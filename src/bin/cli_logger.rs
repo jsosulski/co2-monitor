@@ -1,5 +1,5 @@
 //! Whenver a new complete reading is available, logs it *as a whole* to the cli. When the reading didn't change, a
-//! simple '.' is appended to the line.
+//! simple '.' is appended to the line. In addition writes readings to a csv file.
 use chrono::{Local, NaiveDateTime};
 use co2::{MonitorReading, MonitorReadingParts, device::Co2MonitorCommunication, pc::PcCo2Monitor};
 use serde::Serialize;
