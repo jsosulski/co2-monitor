@@ -1,4 +1,4 @@
-//! Contains device specific handling code and the trait definition for the Co2Monitor.
+//! Contains device specific handling code and the trait definition for the `Co2Monitor`.
 use crate::{MonitorReading, MonitorReadingParts};
 
 const VID: u16 = 0x04d9;
@@ -19,8 +19,9 @@ pub enum MonitorError {
 pub trait Co2MonitorCommunication {
     /// This method should create your managing struct and set up the necessary connection.
     fn init_and_connect() -> Self;
+
     /// This rarely needs to be called directly, use `read_to_part` instead.
-    /// It should read a single 8-byte HID report to the read_buffer.
+    /// It should read a single 8-byte HID report to the `read_buffer`.
     fn read(&self, read_buffer: &mut [u8; 8]) -> Result<usize, MonitorError>;
 
     /// Online resources have some key or magic table in here, but for my co2 device it works with just zeroes...
@@ -28,14 +29,17 @@ pub trait Co2MonitorCommunication {
     fn get_feature_report() -> &'static [u8; 9] {
         &[0u8; 9]
     }
+
     /// The vendor ID of the used ZYG-01
     fn get_vid() -> u16 {
         VID
     }
+
     /// The product ID of the used ZYG-01
     fn get_pid() -> u16 {
         PID
     }
+
     /// If `read` is implemented, this function reads a single HID report and, if a correct op-code was read, fills
     /// the passed partial reading. If all parts have been read, it returns Some(...) with a complete reading.
     fn read_to_part(

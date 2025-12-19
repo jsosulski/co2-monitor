@@ -1,7 +1,6 @@
 //! The actual code for converting the HID reports between byte values and useful numbers.
 #![no_std]
 
-// use heapless::{String, Vec};
 pub mod device;
 #[cfg(feature = "pc")]
 pub mod pc;
@@ -46,9 +45,9 @@ impl MonitorReadingParts {
 
         match raw_report {
             MonitorReportRaw::Temperature(val) => {
-                let temperature_in_kelvin = (val as f32) / 16.0;
+                let temperature_in_kelvin = f32::from(val) / 16.0;
                 let temperature_in_c = temperature_in_kelvin - 273.15;
-                self.temperature = Some(temperature_in_c)
+                self.temperature = Some(temperature_in_c);
             }
             MonitorReportRaw::Co2Value(val) => {
                 self.co2_value = Some(val);
@@ -59,7 +58,7 @@ impl MonitorReadingParts {
                 // creasing CO2 values. It is not quite 1:1, there is some small-ish factor involved,
                 // but for now this offset should be enough.
                 const MAGIC_OFFSET_THAT_NEEDS_BETTER_ESTIMATE: u16 = 12811;
-                self.co2_sanity_check = Some(MAGIC_OFFSET_THAT_NEEDS_BETTER_ESTIMATE - val)
+                self.co2_sanity_check = Some(MAGIC_OFFSET_THAT_NEEDS_BETTER_ESTIMATE - val);
             }
             MonitorReportRaw::Unknown(_, _) => (),
         }
