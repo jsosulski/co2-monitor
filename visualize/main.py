@@ -23,16 +23,14 @@ app.layout = html.Div([
 def update_graph(n):
     df = pd.read_csv(CSV_PATH, parse_dates=['timestamp'])
 
-    # --- Prepare CO₂ data with gaps for invalid values ---
     df["co2_for_plot"] = df["co2_ppm"].where(df["co2_is_valid"], None)
 
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-    # --- CO₂ background bands ---
-    co2_max = max(2000, df["co2_ppm"].max())
-
-    # --- CO₂ background bands (explicit yref=y2) ---
-    co2_max = max(2000, df["co2_ppm"].max())
+    co2_min = min(400, df["co2_for_plot"].min()) - 10
+    co2_max = max(2000, df["co2_for_plot"].max()) + 10
+    temp_min = min(15, df["temperature"].min()) - 0.5
+    temp_max = max(25, df["temperature"].max()) + 0.5
 
     fig.add_shape(
         type="rect",
@@ -55,7 +53,6 @@ def update_graph(n):
     )
 
 
-    # --- Plot CO₂ ---
     fig.add_trace(
         go.Scatter(
             x=df['timestamp'],
@@ -68,7 +65,6 @@ def update_graph(n):
         secondary_y=True
     )
 
-    # --- Plot Temperature ---
     fig.add_trace(
         go.Scatter(
             x=df['timestamp'],
@@ -80,7 +76,6 @@ def update_graph(n):
         secondary_y=False
     )
 
-    # --- Add shaded regions for invalid CO₂ ---
     invalid = df[df['co2_is_valid'] == False]
 
     if not invalid.empty:
@@ -96,6 +91,18 @@ def update_graph(n):
                 opacity=0.15,
                 line_width=0
             )
+          
+    fig.update_yaxes(
+        range=[temp_min, temp_max],
+        title_text="Temperature (°C)",
+        secondary_y=False
+    )
+
+    fig.update_yaxes(
+        range=[co2_min, co2_max],
+        title_text="CO₂ (ppm)",
+        secondary_y=True
+    )
 
     fig.update_layout(
         title="CO₂ and Temperature Over Time",
@@ -114,7 +121,7 @@ def update_graph(n):
         ),
         yaxis2=dict(
             title=dict(
-                text="CO2 (ppm)",
+                text="CO₂ (ppm)",
                 font=dict(color="blue")
             ),
             tickfont=dict(color="blue")
