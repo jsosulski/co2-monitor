@@ -1,25 +1,35 @@
-# Lib + CLI to read out ZYG-01 sensors via USB-HID
+# Lib + CLI to read out Zyaura ZGm053U sensors via USB-HID
 
-This repo consists of a `no_std` library for reading out and getting the actual sensor readings from the device, and an
-example implementation of a PC CLI program.
+This repo consists of a `no_std` library for parsing the actual sensor readings from the device, and a (`yes_std`)
+example implementation of the main trait in a PC CLI program.
 
 Most of the reverse-engineering necessary has already been done by other people, notably
 [uucidl/uu.co2-reader](https://github.com/uucidl/uu.co2-reader). Note that for some reason most online resources
 regarding this sensor need to decrypt the output of the sensor with some magic table. However, my device just gives out
 the data unencrypted. But also, I don't really have an idea how USB HID works so...
 
-My device is a rebrand of [zgm053u](https://www.zyaura.com/product-detail/zgm053u/) namely
+My device is a rebrand of [ZGm053U](https://www.zyaura.com/product-detail/zgm053u/) namely
 [airco2ntrol-mini](https://www.tfa-dostmann.de/produkt/co2-monitor-airco2ntrol-mini-31-5006/) by tfa.
 Interestingly the tfa device doesn't even advertise the capability to read out anything from the usb port.
 
 If at some point I figure out how to have an ESP32-S3 act as a USB-HID host using Rust, I might also add a program
-that reads out the sensor using the esp32 and publishes it somewhere over the ~rainbow~ wifi.
+that reads out the sensor using the ESP32 and publishes it somewhere over the ~rainbow~ wifi.
 
 ## CLI usage
 
 The CLI works on linux, for other OSes YMMV. It logs approx every 5 seconds the latest co2 and temperature readings to
-a csv file in the directory the cli was invoked. If your use doesnt have HID permissions you need to run the cli with
-sudo, e.g.:
+a csv file in the directory the cli was invoked. If your user doesnt have HID permissions you need to run the cli with
+sudo.
+
+```bash
+cargo run -r --features pc
+```
+
+You might get some permission errors when your user does not have permissions to directly access HID devices.
+How do HID Keyboards work then, you ask? ¯\_(ツ)_/¯
+In any case, if you don't want to do the responsible thing and create the udev rules, you can always run the cli with
+sudo, but you wouldn't just run some random rust binary with sudo on your machine, right?
+Just for completeness, this would be the command you would not use:
 
 ```bash
 cargo build -r --features pc && sudo ./target/release/co2_cli

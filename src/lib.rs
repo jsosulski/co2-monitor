@@ -1,4 +1,5 @@
-//! The actual code for converting the HID reports between byte values and useful numbers.
+//! Read out ZGm053U Co2/Temperature Sensors with this crate.
+#![doc = include_str!("../README.md")]
 #![no_std]
 #![warn(missing_docs)]
 
@@ -6,6 +7,8 @@ pub mod device;
 #[cfg(feature = "pc")]
 pub mod pc;
 
+#[doc(inline)]
+pub use device::{Co2MonitorCommunication, MonitorError};
 /// Contains the individual parts that can be read from the monitor.
 ///
 /// Use this to read from the device, and write whatever value is coming in, to this struct.

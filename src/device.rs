@@ -4,7 +4,7 @@ use crate::{MonitorReading, MonitorReadingParts};
 const VID: u16 = 0x04d9;
 const PID: u16 = 0xa052;
 
-/// Most errors should be safely assumed to be skippable.
+/// For most errors the embedded way of dealing with things is try again...
 pub enum MonitorError {
     /// Something during the read failed.
     ReadFailed,
@@ -32,12 +32,12 @@ pub trait Co2MonitorCommunication {
         &[0u8; 9]
     }
 
-    /// The vendor ID of the used ZYG-01
+    /// The vendor ID of the used ZGm053U
     fn get_vid() -> u16 {
         VID
     }
 
-    /// The product ID of the used ZYG-01
+    /// The product ID of the used ZGm053U
     fn get_pid() -> u16 {
         PID
     }

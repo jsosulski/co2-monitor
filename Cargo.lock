@@ -54,7 +54,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "co2"
+name = "co2-monitor"
 version = "0.1.0"
 dependencies = [
  "chrono",
