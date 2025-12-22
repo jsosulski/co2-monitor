@@ -26,7 +26,7 @@ cargo run -r --features pc
 ```
 
 You might get some permission errors when your user does not have permissions to directly access HID devices.
-How do HID Keyboards work then, you ask? ¯\_(ツ)_/¯
+How do HID Keyboards work then, you ask? `¯\_(ツ)_/¯`
 In any case, if you don't want to do the responsible thing and create the udev rules, you can always run the cli with
 sudo, but you wouldn't just run some random rust binary with sudo on your machine, right?
 Just for completeness, this would be the command you would not use:
