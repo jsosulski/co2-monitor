@@ -8,6 +8,10 @@ import plotly.graph_objects as go
 
 CSV_PATH = "../log.csv"
 
+YELLOW_LIMIT = 800
+RED_LIMIT = 1200
+DEFAULT_MAX = 1600
+
 app = Dash(__name__)
 
 app.layout = html.Div([
@@ -28,14 +32,14 @@ def update_graph(n):
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
     co2_min = min(400, df["co2_for_plot"].min()) - 10
-    co2_max = max(2000, df["co2_for_plot"].max()) + 10
+    co2_max = max(DEFAULT_MAX, df["co2_for_plot"].max()) + 10
     temp_min = min(15, df["temperature"].min()) - 0.5
     temp_max = max(25, df["temperature"].max()) + 0.5
 
     fig.add_shape(
         type="rect",
         xref="paper", x0=0, x1=1,
-        yref="y2", y0=1000, y1=1500,
+        yref="y2", y0=YELLOW_LIMIT, y1=RED_LIMIT,
         fillcolor="yellow",
         opacity=0.17,
         layer="below",
@@ -45,7 +49,7 @@ def update_graph(n):
     fig.add_shape(
         type="rect",
         xref="paper", x0=0, x1=1,
-        yref="y2", y0=1500, y1=co2_max,
+        yref="y2", y0=RED_LIMIT, y1=co2_max,
         fillcolor="red",
         opacity=0.12,
         layer="below",
