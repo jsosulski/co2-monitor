@@ -1,4 +1,4 @@
-//! Whenver a new complete reading is available, logs it *as a whole* to the cli. When the reading didn't change, a
+//! Whenever a new complete reading is available, logs it *as a whole*. When the sensor reading didn't change, a
 //! simple '.' is appended to the line. In addition writes readings to a csv file.
 use chrono::{Local, NaiveDateTime};
 use co2_monitor::{
@@ -16,10 +16,10 @@ struct Row {
 }
 
 fn main() {
+    let program_start = std::time::Instant::now();
     let monitor = PcCo2Monitor::init_and_connect();
     let mut prev_reading = MonitorReading::default();
     let mut partial_reading = MonitorReadingParts::default();
-    let program_start = std::time::Instant::now();
     let mut csv_writer = csv::Writer::from_path("log.csv").unwrap();
     loop {
         if let Ok(Some(reading)) = monitor.read_to_part(&mut partial_reading) {

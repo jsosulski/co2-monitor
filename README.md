@@ -10,15 +10,15 @@ the data unencrypted. But also, I don't really have an idea how USB HID works so
 
 My device is a rebrand of [ZGm053U](https://www.zyaura.com/product-detail/zgm053u/) namely
 [airco2ntrol-mini](https://www.tfa-dostmann.de/produkt/co2-monitor-airco2ntrol-mini-31-5006/) by tfa.
-Interestingly the tfa device doesn't even advertise the capability to read out anything from the usb port.
+Interestingly, tfa doesn't even advertise the capability of the device to read out anything from the USB port.
 
-If at some point I figure out how to have an ESP32-S3 act as a USB-HID host using Rust, I might also add a program
+If, at some point, I figure out how to have an ESP32-S3 act as a USB-HID host using rust, I might also add a program
 that reads out the sensor using the ESP32 and publishes it somewhere over the ~rainbow~ wifi.
 
 ## CLI usage
 
 The CLI works on linux, for other OSes YMMV. It logs approx every 5 seconds the latest co2 and temperature readings to
-a csv file in the directory the cli was invoked. If your user doesnt have HID permissions you need to run the cli with
+a csv file in the directory the CLI was invoked. If your user doesnt have HID permissions you need to run the CLI with
 sudo.
 
 ```bash
@@ -27,9 +27,9 @@ cargo run -r --features pc
 
 You might get some permission errors when your user does not have permissions to directly access HID devices.
 How do HID Keyboards work then, you ask? `¯\_(ツ)_/¯`
-In any case, if you don't want to do the responsible thing and create the udev rules, you can always run the cli with
+In any case, if you don't want to do the responsible thing and create the udev rules, you can always run the CLI with
 sudo, but you wouldn't just run some random rust binary with sudo on your machine, right?
-Just for completeness, this would be the command you would not use:
+Just for completeness, this would be the command you would **not** use:
 
 ```bash
 cargo build -r --features pc && sudo ./target/release/co2_cli

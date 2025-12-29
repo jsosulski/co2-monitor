@@ -16,23 +16,27 @@ app = Dash(__name__)
 
 app.layout = html.Div([
     html.H3("Live CO₂ & Temperature Monitor"),
-    dcc.Graph(id='live-graph'),
+    html.Div(id="current"),
+    dcc.Graph(id='live-graph', config={"displayModeBar": False}),
     dcc.Interval(id='interval', interval=15*1000, n_intervals=0)
 ])
 
 @app.callback(
     Output('live-graph', 'figure'),
+    Output('current', 'children'),
     Input('interval', 'n_intervals')
 )
 def update_graph(n):
     df = pd.read_csv(CSV_PATH, parse_dates=['timestamp'])
 
-    df["co2_for_plot"] = df["co2_ppm"].where(df["co2_is_valid"], None)
+    df["co2_for_plot"] = df["co2_ppm"]#.where(df["co2_is_valid"], None)
 
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
+    co2_now = df["co2_for_plot"].iloc[-1]
     co2_min = min(400, df["co2_for_plot"].min()) - 10
     co2_max = max(DEFAULT_MAX, df["co2_for_plot"].max()) + 10
+    temp_now = df["temperature"].iloc[-1]
     temp_min = min(15, df["temperature"].min()) - 0.5
     temp_max = max(25, df["temperature"].max()) + 0.5
 
@@ -82,19 +86,19 @@ def update_graph(n):
 
     invalid = df[df['co2_is_valid'] == False]
 
-    if not invalid.empty:
-        invalid["gap"] = (invalid["timestamp"].diff() > pd.Timedelta("1s")).cumsum()
+    # if not invalid.empty:
+    #     invalid["gap"] = (invalid["timestamp"].diff() > pd.Timedelta("1s")).cumsum()
 
-        for _, group in invalid.groupby("gap"):
-            start = group["timestamp"].iloc[0]
-            end   = group["timestamp"].iloc[-1]
+    #     for _, group in invalid.groupby("gap"):
+    #         start = group["timestamp"].iloc[0]
+    #         end   = group["timestamp"].iloc[-1]
 
-            fig.add_vrect(
-                x0=start, x1=end,
-                fillcolor="red",
-                opacity=0.15,
-                line_width=0
-            )
+    #         fig.add_vrect(
+    #             x0=start, x1=end,
+    #             fillcolor="red",
+    #             opacity=0.15,
+    #             line_width=0
+    #         )
           
     fig.update_yaxes(
         range=[temp_min, temp_max],
@@ -132,7 +136,9 @@ def update_graph(n):
         )
     )
 
-    return fig
+    current = f"Aktuell: {co2_now} CO₂ (ppm) und {temp_now:.1f}°C"
+
+    return fig, current
 
 if __name__ == "__main__":
     app.run(debug=False, host="0.0.0.0")

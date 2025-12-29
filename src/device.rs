@@ -4,6 +4,7 @@ use crate::{MonitorReading, MonitorReadingParts};
 const VID: u16 = 0x04d9;
 const PID: u16 = 0xa052;
 
+#[derive(Clone, Copy, Debug)]
 /// For most errors the embedded way of dealing with things is try again...
 pub enum MonitorError {
     /// Something during the read failed.
