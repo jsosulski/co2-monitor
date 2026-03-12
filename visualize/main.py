@@ -65,9 +65,9 @@ def update_graph(n):
         go.Scatter(
             x=df['timestamp'],
             y=df['co2_for_plot'],
-            mode='lines',
             name='CO₂ (ppm)',
-            line=dict(color="blue"),
+            mode='lines+markers',
+            line=dict(color="blue", dash="dot"),
             connectgaps=False
         ),
         secondary_y=True
@@ -77,9 +77,9 @@ def update_graph(n):
         go.Scatter(
             x=df['timestamp'],
             y=df['temperature'],
-            mode='lines',
+            mode='lines+markers',
+            line=dict(color="red", dash="dot"),
             name='Temperature (°C)',
-            line=dict(color="red")
         ),
         secondary_y=False
     )

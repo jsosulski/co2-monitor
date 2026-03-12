@@ -5,7 +5,7 @@ use co2_monitor::{
     MonitorReading, MonitorReadingParts, device::Co2MonitorCommunication, pc::PcCo2Monitor,
 };
 use serde::Serialize;
-use std::io::Write;
+use std::{io::Write, time::Duration};
 
 #[derive(Serialize)]
 struct Row {
@@ -17,30 +17,42 @@ struct Row {
 
 fn main() {
     let program_start = std::time::Instant::now();
-    let monitor = PcCo2Monitor::init_and_connect();
-    let mut prev_reading = MonitorReading::default();
-    let mut partial_reading = MonitorReadingParts::default();
     let mut csv_writer = csv::Writer::from_path("log.csv").unwrap();
     loop {
-        if let Ok(Some(reading)) = monitor.read_to_part(&mut partial_reading) {
-            let (ppm, valid) = reading.co2_value.as_num_and_bool();
-            let now = Local::now().naive_local();
-            let row = Row {
-                temperature: reading.temperature,
-                co2_ppm: ppm as usize,
-                co2_is_valid: valid,
-                timestamp: now,
+        let mut heartbeat = std::time::Instant::now();
+        let monitor = PcCo2Monitor::init_and_connect();
+        let mut prev_reading = MonitorReading::default();
+        let mut partial_reading = MonitorReadingParts::default();
+        loop {
+            if heartbeat.elapsed() > Duration::from_secs(60) {
+                println!(
+                    "WARNING, there were no readings since at least 60 seconds. Re-starting loop."
+                );
+                break;
+                // std::time::Duration::slee
             };
-            csv_writer.serialize(&row).unwrap();
-            if reading != prev_reading {
-                println!();
-                print!("{:>10.1?} -- {:.1}", program_start.elapsed(), reading);
-                prev_reading = reading;
-            } else {
-                print!(".");
+            std::thread::sleep(Duration::from_millis(200));
+            if let Ok(Some(reading)) = monitor.read_to_part(&mut partial_reading) {
+                let (ppm, valid) = reading.co2_value.as_num_and_bool();
+                let now = Local::now().naive_local();
+                let row = Row {
+                    temperature: reading.temperature,
+                    co2_ppm: ppm as usize,
+                    co2_is_valid: valid,
+                    timestamp: now,
+                };
+                csv_writer.serialize(&row).unwrap();
+                if reading != prev_reading {
+                    println!();
+                    print!("{:>10.1?} -- {:.1}", program_start.elapsed(), reading);
+                    prev_reading = reading;
+                } else {
+                    print!(".");
+                }
+                csv_writer.flush().unwrap();
+                std::io::stdout().flush().unwrap();
+                heartbeat = std::time::Instant::now();
             }
-            csv_writer.flush().unwrap();
-            std::io::stdout().flush().unwrap();
         }
     }
 }
