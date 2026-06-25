@@ -5,6 +5,9 @@ from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
+import lttb
+import numpy as np
+
 
 CSV_PATH = "../log.csv"
 
@@ -60,11 +63,30 @@ def update_graph(n):
         line_width=0
     )
 
+    co2_df = lttb.downsample(
+        np.column_stack([df["timestamp"].astype("int64"), df["co2_for_plot"]]),
+        n_out=2000
+    )
+    co2_df = pd.DataFrame(
+        co2_df,
+        columns=["timestamp", "co2_for_plot"]
+    )
+    co2_df["timestamp"] = pd.to_datetime(co2_df["timestamp"])
+
+    temp_df = lttb.downsample(
+        np.column_stack([df["timestamp"].astype("int64"), df["temperature"]]),
+        n_out=2000
+    )
+    temp_df = pd.DataFrame(
+        temp_df,
+        columns=["timestamp", "temperature"]
+    )
+    temp_df["timestamp"] = pd.to_datetime(temp_df["timestamp"])
 
     fig.add_trace(
         go.Scatter(
-            x=df['timestamp'],
-            y=df['co2_for_plot'],
+            x=co2_df['timestamp'],
+            y=co2_df['co2_for_plot'],
             name='CO₂ (ppm)',
             mode='lines+markers',
             line=dict(color="blue", dash="dot"),
@@ -75,8 +97,8 @@ def update_graph(n):
 
     fig.add_trace(
         go.Scatter(
-            x=df['timestamp'],
-            y=df['temperature'],
+            x=temp_df['timestamp'],
+            y=temp_df['temperature'],
             mode='lines+markers',
             line=dict(color="red", dash="dot"),
             name='Temperature (°C)',
@@ -141,4 +163,4 @@ def update_graph(n):
     return fig, current
 
 if __name__ == "__main__":
-    app.run(debug=False, host="0.0.0.0")
+    app.run(debug=False, host="0.0.0.0", port="80")

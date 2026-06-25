@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "dash>=3.3.0",
+    "lttb>=0.3.2",
     "matplotlib>=3.10.7",
     "pandas>=2.3.3",
     "plotly>=6.5.0",

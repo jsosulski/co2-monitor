@@ -26,10 +26,10 @@ fn main() {
         loop {
             if heartbeat.elapsed() > Duration::from_secs(60) {
                 println!(
-                    "WARNING, there were no readings since at least 60 seconds. Re-starting loop."
+                    "WARNING, there were no readings since at least 60 seconds. Re-starting loop in 10 seconds."
                 );
+                std::thread::sleep(Duration::from_secs(10));
                 break;
-                // std::time::Duration::slee
             };
             std::thread::sleep(Duration::from_millis(200));
             if let Ok(Some(reading)) = monitor.read_to_part(&mut partial_reading) {
