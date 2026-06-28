@@ -1,5 +1,5 @@
 import pandas as pd
-from dash import Dash, dcc, html
+from dash import Dash, dcc, html, no_update
 from dash.dependencies import Input, Output
 
 from plotly.subplots import make_subplots
@@ -20,16 +20,24 @@ app = Dash(__name__)
 app.layout = html.Div([
     html.H3("Live CO₂ & Temperature Monitor"),
     html.Div(id="current"),
+    dcc.Checklist(id="options-checklist", options=[{"label": "Naive sampling", "value": "naive"}, {"label": "Auto update", "value": "auto-update"}], value=["auto-update"]),
     dcc.Graph(id='live-graph', config={"displayModeBar": False}),
-    dcc.Interval(id='interval', interval=15*1000, n_intervals=0)
+    dcc.Interval(id='interval', interval=10*1000, n_intervals=0)
 ])
 
 @app.callback(
     Output('live-graph', 'figure'),
     Output('current', 'children'),
-    Input('interval', 'n_intervals')
+    Input('interval', 'n_intervals'),
+    Input('options-checklist', "value")
 )
-def update_graph(n):
+def update_graph(n, options):
+    options = options or []
+    use_naive = "naive" in options
+    auto_update = "auto-update" in options
+    use_lttb = not use_naive
+    if not auto_update:
+        return no_update, no_update
     df = pd.read_csv(CSV_PATH, parse_dates=['timestamp'])
 
     df["co2_for_plot"] = df["co2_ppm"]#.where(df["co2_is_valid"], None)
@@ -63,25 +71,36 @@ def update_graph(n):
         line_width=0
     )
 
-    co2_df = lttb.downsample(
-        np.column_stack([df["timestamp"].astype("int64"), df["co2_for_plot"]]),
-        n_out=2000
-    )
-    co2_df = pd.DataFrame(
-        co2_df,
-        columns=["timestamp", "co2_for_plot"]
-    )
-    co2_df["timestamp"] = pd.to_datetime(co2_df["timestamp"])
+    n_out = 1000
 
-    temp_df = lttb.downsample(
-        np.column_stack([df["timestamp"].astype("int64"), df["temperature"]]),
-        n_out=2000
-    )
-    temp_df = pd.DataFrame(
-        temp_df,
-        columns=["timestamp", "temperature"]
-    )
-    temp_df["timestamp"] = pd.to_datetime(temp_df["timestamp"])
+    if len(df) <= n_out:
+        co2_df = df[["timestamp", "co2_for_plot"]].copy()
+        temp_df = df[["timestamp", "temperature"]].copy()
+    else:
+        if use_lttb:
+            co2_df = lttb.downsample(
+                np.column_stack([df["timestamp"].astype("int64"), df["co2_for_plot"]]),
+                n_out=n_out
+            )
+            co2_df = pd.DataFrame(
+                co2_df,
+                columns=["timestamp", "co2_for_plot"]
+            )
+            co2_df["timestamp"] = pd.to_datetime(co2_df["timestamp"])
+            temp_df = lttb.downsample(
+                np.column_stack([df["timestamp"].astype("int64"), df["temperature"]]),
+                n_out=n_out
+            )
+            temp_df = pd.DataFrame(
+                temp_df,
+                columns=["timestamp", "temperature"]
+            )
+            temp_df["timestamp"] = pd.to_datetime(temp_df["timestamp"])
+        else:
+            idx = np.linspace(0, len(df) - 1, n_out, dtype=int)
+            co2_df = df.iloc[idx][["timestamp", "co2_for_plot"]].copy()
+            temp_df = df.iloc[idx][["timestamp", "temperature"]].copy()
+
 
     fig.add_trace(
         go.Scatter(

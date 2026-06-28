@@ -17,7 +17,25 @@ struct Row {
 
 fn main() {
     let program_start = std::time::Instant::now();
-    let mut csv_writer = csv::Writer::from_path("log.csv").unwrap();
+
+    use std::fs::OpenOptions;
+    const LOG_NAME: &str = "log.csv";
+
+    let log_exists = std::path::Path::new(LOG_NAME).exists();
+    if log_exists {
+        println!("Appending to existing log file.");
+    }
+
+    let file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(LOG_NAME)
+        .unwrap();
+
+    let mut csv_writer = csv::WriterBuilder::new()
+        .has_headers(!log_exists)
+        .from_writer(file);
+
     loop {
         let mut heartbeat = std::time::Instant::now();
         let monitor = PcCo2Monitor::init_and_connect();
