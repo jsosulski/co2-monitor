@@ -1,3 +1,4 @@
+from datetime import timedelta, datetime
 import pandas as pd
 from dash import Dash, dcc, html, no_update
 from dash.dependencies import Input, Output
@@ -20,7 +21,15 @@ app = Dash(__name__)
 app.layout = html.Div([
     html.H3("Live CO₂ & Temperature Monitor"),
     html.Div(id="current"),
-    dcc.Checklist(id="options-checklist", options=[{"label": "Naive sampling", "value": "naive"}, {"label": "Auto update", "value": "auto-update"}], value=["auto-update"]),
+    dcc.Checklist(id="options-checklist", options=[{"label": "Auto update", "value": "auto-update"}, {"label": "Naive sampling", "value": "naive"}, {"label": "Fixed y-lim", "value": "fixed_ylim"}], value=["auto-update", "fixed_ylim"], inline=True),
+    dcc.RadioItems(
+        id="interval-select", options=[
+            {"label": "Full", "value": "full"},
+            {"label": "3 days", "value": "3d"},
+            {"label": "1 day", "value": "1d"},
+            {"label": "1 hour", "value": "1h"},
+        ], value="full", inline=True,
+    ),
     dcc.Graph(id='live-graph', config={"displayModeBar": False}),
     dcc.Interval(id='interval', interval=10*1000, n_intervals=0)
 ])
@@ -29,9 +38,10 @@ app.layout = html.Div([
     Output('live-graph', 'figure'),
     Output('current', 'children'),
     Input('interval', 'n_intervals'),
-    Input('options-checklist', "value")
+    Input('options-checklist', "value"),
+    Input('interval-select', "value")
 )
-def update_graph(n, options):
+def update_graph(n, options, interval):
     options = options or []
     use_naive = "naive" in options
     auto_update = "auto-update" in options
@@ -41,6 +51,15 @@ def update_graph(n, options):
     df = pd.read_csv(CSV_PATH, parse_dates=['timestamp'])
 
     df["co2_for_plot"] = df["co2_ppm"]#.where(df["co2_is_valid"], None)
+
+    now = datetime.now()
+
+    if interval == "3d":
+        df = df.loc[df["timestamp"] >= now - timedelta(hours=72)]
+    if interval == "1d":
+        df = df.loc[df["timestamp"] >= now - timedelta(hours=24)]
+    elif interval == "1h":
+        df = df.loc[df["timestamp"] >= now - timedelta(hours=1)]
 
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
@@ -140,18 +159,8 @@ def update_graph(n, options):
     #             opacity=0.15,
     #             line_width=0
     #         )
-          
-    fig.update_yaxes(
-        range=[temp_min, temp_max],
-        title_text="Temperature (°C)",
-        secondary_y=False
-    )
 
-    fig.update_yaxes(
-        range=[co2_min, co2_max],
-        title_text="CO₂ (ppm)",
-        secondary_y=True
-    )
+    fixed_ylim = "fixed_ylim" in options
 
     fig.update_layout(
         title="CO₂ and Temperature Over Time",
@@ -175,6 +184,18 @@ def update_graph(n, options):
             ),
             tickfont=dict(color="blue")
         )
+    )
+          
+    fig.update_yaxes(
+        range=[temp_min, temp_max] if fixed_ylim else [None, None],
+        title_text="Temperature (°C)",
+        secondary_y=False
+    )
+
+    fig.update_yaxes(
+        range=[co2_min, co2_max] if fixed_ylim else [None, None],
+        title_text="CO₂ (ppm)",
+        secondary_y=True
     )
 
     current = f"Aktuell: {co2_now} CO₂ (ppm) und {temp_now:.1f}°C"
