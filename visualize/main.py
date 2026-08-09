@@ -27,8 +27,9 @@ app.layout = html.Div([
             {"label": "Full", "value": "full"},
             {"label": "3 days", "value": "3d"},
             {"label": "1 day", "value": "1d"},
+            {"label": "8 hour", "value": "8h"},
             {"label": "1 hour", "value": "1h"},
-        ], value="full", inline=True,
+        ], value="8h", inline=True,
     ),
     dcc.Graph(id='live-graph', config={"displayModeBar": False}),
     dcc.Interval(id='interval', interval=10*1000, n_intervals=0)
@@ -58,6 +59,8 @@ def update_graph(n, options, interval):
         df = df.loc[df["timestamp"] >= now - timedelta(hours=72)]
     if interval == "1d":
         df = df.loc[df["timestamp"] >= now - timedelta(hours=24)]
+    elif interval == "8h":
+        df = df.loc[df["timestamp"] >= now - timedelta(hours=8)]
     elif interval == "1h":
         df = df.loc[df["timestamp"] >= now - timedelta(hours=1)]
 
@@ -143,22 +146,6 @@ def update_graph(n, options, interval):
         ),
         secondary_y=False
     )
-
-    invalid = df[df['co2_is_valid'] == False]
-
-    # if not invalid.empty:
-    #     invalid["gap"] = (invalid["timestamp"].diff() > pd.Timedelta("1s")).cumsum()
-
-    #     for _, group in invalid.groupby("gap"):
-    #         start = group["timestamp"].iloc[0]
-    #         end   = group["timestamp"].iloc[-1]
-
-    #         fig.add_vrect(
-    #             x0=start, x1=end,
-    #             fillcolor="red",
-    #             opacity=0.15,
-    #             line_width=0
-    #         )
 
     fixed_ylim = "fixed_ylim" in options
 

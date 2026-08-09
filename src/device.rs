@@ -29,7 +29,7 @@ pub trait Co2MonitorCommunication {
 
     /// Online resources have some key or magic table in here, but for my co2 device it works with just zeroes...
     /// Sending the feature report is still necessary. Otherwise no HID data will be available.
-    fn get_feature_report() -> &'static [u8; 9] {
+    fn get_feature_report_to_start_sending() -> &'static [u8; 9] {
         &[0u8; 9]
     }
 

@@ -16,7 +16,7 @@ impl Co2MonitorCommunication for PcCo2Monitor {
 
         // This tells the monitor to actually start sending data over HID.
         device
-            .send_feature_report(Self::get_feature_report())
+            .send_feature_report(Self::get_feature_report_to_start_sending())
             .expect("Could not send feature report.");
 
         Self { device }
