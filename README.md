@@ -18,8 +18,7 @@ that reads out the sensor using the ESP32 and publishes it somewhere over the ~r
 ## CLI usage
 
 The CLI works on linux, for other OSes YMMV. It logs approx every 5 seconds the latest co2 and temperature readings to
-a csv file in the directory the CLI was invoked. If your user doesnt have HID permissions you need to run the CLI with
-sudo.
+a csv file in the directory the CLI was invoked.
 
 ```bash
 cargo run -r --features pc
