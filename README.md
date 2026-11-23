@@ -24,6 +24,12 @@ a csv file in the directory the CLI was invoked.
 cargo run -r --features pc
 ```
 
+Pass `--with-dash` to also start the Python visualization dashboard (via `visualize/main.py`) when the CLI starts:
+
+```bash
+cargo run -r --features pc -- --with-dash
+```
+
 You might get some permission errors when your user does not have permissions to directly access HID devices.
 How do HID Keyboards work then, you ask? `¯\_(ツ)_/¯`
 In any case, if you don't want to do the responsible thing and create the udev rules, you can always run the CLI with

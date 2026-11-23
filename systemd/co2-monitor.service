@@ -1,0 +1,47 @@
+# systemd unit for the co2 monitor CLI (with the Dash visualization dashboard).
+#
+# To install:
+#   1. Build the binary:  cargo build --release --features pc
+#   2. Copy this file to /etc/systemd/system/co2-monitor.service
+#      (edit User=/Group=/WorkingDirectory=/ExecStart= if your paths differ)
+#   3. Reload and enable: sudo systemctl daemon-reload
+#                         sudo systemctl enable --now co2-monitor.service
+#   4. Check:             systemctl status co2-monitor.service
+#              dashboard: http://<host>:51000/
+#
+# IMPORTANT - HID access:
+#   /dev/hidraw* is by default owned by root:root with mode 0640, so a regular user
+#   cannot read the sensor. Either run the service as root (see note below), or
+#   install the optional udev rule in co2-monitor.rules (next to this file) which
+#   grants read/write on the co2 sensor to the plugdev group. The user must be in
+#   that group (jan is already in plugdev, 1000). The udev approach is preferred.
+#
+# Note on the dashboard: the CLI spawns the Dash python process as a child.
+# KillMode=control-group ensures the whole cgroup (python included) is stopped on
+# service stop/restart instead of leaving an orphaned dashboard behind.
+
+[Unit]
+Description=CO2 sensor logger + visualization dashboard
+After=network.target
+
+[Service]
+Type=simple
+User=jan
+Group=plugdev
+WorkingDirectory=/home/jan/dev/rust/co2
+ExecStart=/home/jan/dev/rust/co2/target/release/co2_cli --with-dash
+
+Restart=on-failure
+RestartSec=5
+KillMode=control-group
+
+StandardOutput=journal
+StandardError=journal
+
+# Hardening (safe: the CLI only needs the repo directory read/write for log.csv)
+NoNewPrivileges=true
+ProtectSystem=full
+ReadWritePaths=/home/jan/dev/rust/co2
+
+[Install]
+WantedBy=multi-user.target

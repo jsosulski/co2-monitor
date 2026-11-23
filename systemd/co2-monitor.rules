@@ -1,0 +1,7 @@
+# Optional udev rule for hidraw access to the ZGm053U co2 sensor.
+# Copy to /etc/udev/rules.d/99-co2-monitor.rules and reload:
+#   sudo udevadm control --reload-rules && sudo udevadm trigger --subsystem-match=hidraw
+#
+# Vendor/product IDs of the ZGm053U (see src/device.rs). The sensor is granted
+# read/write to the plugdev group; the service user should belong to that group.
+SUBSYSTEM=="hidraw*", ATTRS{idVendor}=="04d9", ATTRS{idProduct}=="a052", MODE="0660", GROUP="plugdev", TAG+="uaccess"

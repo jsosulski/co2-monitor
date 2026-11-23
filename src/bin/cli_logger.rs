@@ -5,7 +5,44 @@ use co2_monitor::{
     MonitorReading, MonitorReadingParts, device::Co2MonitorCommunication, pc::PcCo2Monitor,
 };
 use serde::Serialize;
-use std::{io::Write, time::Duration};
+use std::{
+    io::Write,
+    process::{Child, Command},
+    time::Duration,
+};
+
+/// RAII guard that kills the visualization subprocess when the CLI exits.
+struct DashGuard(Child);
+
+impl Drop for DashGuard {
+    fn drop(&mut self) {
+        let _ = self.0.kill();
+        let _ = self.0.wait();
+    }
+}
+
+fn start_dashboard() -> Option<DashGuard> {
+    // Anchor to the repo root (the crate's manifest dir) so this works no matter where the CLI is invoked from.
+    let visualize_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("visualize");
+    let python = visualize_dir.join(".venv/bin/python");
+    match Command::new(python)
+        .arg("main.py")
+        .current_dir(&visualize_dir)
+        .spawn()
+    {
+        Ok(child) => {
+            println!("Starting visual dashboard...");
+            Some(DashGuard(child))
+        }
+        Err(e) => {
+            eprintln!(
+                "Could not start the visualization script: {}. Continuing without it.",
+                e
+            );
+            None
+        }
+    }
+}
 
 #[derive(Serialize)]
 struct Row {
@@ -17,6 +54,9 @@ struct Row {
 
 fn main() {
     let program_start = std::time::Instant::now();
+
+    let with_dash = std::env::args().skip(1).any(|arg| arg == "--with-dash");
+    let _dash_guard = with_dash.then(start_dashboard).flatten();
 
     use std::fs::OpenOptions;
     const LOG_NAME: &str = "log.csv";
